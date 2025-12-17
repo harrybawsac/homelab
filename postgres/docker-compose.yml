@@ -1,0 +1,28 @@
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: some_user
+      POSTGRES_PASSWORD: fill_in_something
+      POSTGRES_DB: postgres
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - proxy
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+    ports:
+      # optional: expose to LAN if you want to connect from outside docker
+      - "192.168.2.7:5432:5432"
+
+volumes:
+  postgres-data:
+
+networks:
+  proxy:
+    external: true

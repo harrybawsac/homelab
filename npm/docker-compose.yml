@@ -1,0 +1,20 @@
+services:
+  npm:
+    image: jc21/nginx-proxy-manager:latest
+    container_name: npm
+    restart: always
+    # Bind 80/443 on all interfaces (public-facing), bind admin (81) only to LAN IP
+    ports:
+      - "80:80"
+      - "443:443"
+      # replace 192.168.1.10 with your server's LAN IP
+      - "192.168.2.7:81:81"
+    volumes:
+      - ./data:/data
+      - ./letsencrypt:/etc/letsencrypt
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true

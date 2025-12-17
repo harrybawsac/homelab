@@ -1,0 +1,20 @@
+services:
+  wud:
+    image: getwud/wud:latest
+    container_name: wud
+    restart: always
+    environment:
+      - WUD_LOG_LEVEL=info
+      - WUD_WATCHER_LOCAL_CRON=0 0 * * *
+      - WUD_WATCHER_LOCAL_WATCHBYDEFAULT=true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./data:/store
+    ports:
+      - "192.168.2.7:3069:3000"
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true

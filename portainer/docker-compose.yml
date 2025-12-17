@@ -1,0 +1,17 @@
+services:
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: always
+    # bind only to LAN IP to keep it private
+    ports:
+      - "192.168.2.7:9443:9443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./data:/data
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true
