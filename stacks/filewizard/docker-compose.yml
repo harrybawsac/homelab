@@ -1,0 +1,28 @@
+services:
+  filewizard:
+    image: loredcast/filewizard:latest
+    container_name: filewizard
+    restart: always
+    environment:
+      - LOCAL_ONLY=True # set False when using auth/OAuth
+      - SECRET_KEY=     # set when enabling auth
+      - UPLOADS_DIR=/app/uploads
+      - PROCESSED_DIR=/app/processed
+      - OMP_NUM_THREADS=4
+      - DOWNLOAD_KOKORO_ON_STARTUP=true
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Amsterdam
+    ports:
+      - "6969:8000"
+    volumes:
+      - ./config:/app/config
+      - ./uploads:/app/uploads
+      - ./processed:/app/processed
+    networks:
+      - filewizard
+
+networks:
+  filewizard:
+    name: filewizard
+    driver: bridge
