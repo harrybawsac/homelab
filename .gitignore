@@ -11,6 +11,9 @@ npm/data/
 # Portainer runtime data
 portainer/data/
 
+# WUD runtime data
+wud/data/
+
 # Databases and persistent data
 mariadb/data/
 postgres/postgres-data/
