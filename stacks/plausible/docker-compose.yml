@@ -50,7 +50,7 @@ services:
       # registration: https://github.com/plausible/community-edition/wiki/configuration#registration
       - TOTP_VAULT_KEY
       - DISABLE_REGISTRATION
-      - ENABLE_EMAIL_VERIFICATION=
+      - ENABLE_EMAIL_VERIFICATION
       # web: https://github.com/plausible/community-edition/wiki/configuration#web
       - HTTP_PORT=${HTTP_PORT}
       - HTTPS_PORT
