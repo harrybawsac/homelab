@@ -53,7 +53,7 @@ services:
       - ENABLE_EMAIL_VERIFICATION=
       # web: https://github.com/plausible/community-edition/wiki/configuration#web
       - HTTP_PORT=${HTTP_PORT}
-      - HTTPS_PORT=${HTTPS_PORT}
+      - HTTPS_PORT
       # databases: https://github.com/plausible/community-edition/wiki/configuration#database
       # Using external postgres - connection string format: postgres://username:password@hostname:port/database?options=--search_path=schema
       - DATABASE_URL=${DATABASE_URL}
