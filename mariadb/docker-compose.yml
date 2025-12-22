@@ -4,7 +4,7 @@ services:
     container_name: mariadb
     restart: always
     environment:
-      - MYSQL_ROOT_PASSWORD=fill_in_something
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
     volumes:
       - ./data:/var/lib/mysql
     healthcheck:
@@ -15,7 +15,7 @@ services:
       start_period: 30s
     ports:
       # Optional: expose to LAN if you want to connect from outside docker
-      - "192.168.2.7:3306:3306"
+      - "${LAN_IP}:3306:3306"
     networks:
       - proxy
 

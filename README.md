@@ -7,6 +7,7 @@ This repository contains Docker Compose configurations for a complete homelab se
 - [Overview](#overview)
 - [Services](#services)
 - [Prerequisites](#prerequisites)
+- [Environment Variables Configuration](#-environment-variables-configuration)
 - [Network Architecture](#network-architecture)
 - [Getting Started](#getting-started)
 - [Managing Services](#managing-services)
@@ -21,9 +22,9 @@ This homelab setup uses Docker Compose to manage multiple containerized services
 - **Core Infrastructure**: Nginx Proxy Manager, Portainer, PostgreSQL, MariaDB
 - **Monitoring**: WUD (What's Up Docker) for container update tracking
 - **Media Stack**: Complete *arr suite for media automation
-- **Analytics**: Matomo web analytics
+- **Analytics**: Matomo and Plausible for web analytics
 - **Home Automation**: Home Assistant
-- **Utilities**: Various helper services
+- **Utilities**: FileWizard, Whoami, and other helper services
 
 ## 🚀 Services
 
@@ -48,18 +49,14 @@ This homelab setup uses Docker Compose to manage multiple containerized services
 - **Purpose**: Database server (for services requiring PostgreSQL)
 - **Location**: `postgres/`
 - **Ports**: `192.168.2.7:5432` - PostgreSQL (LAN only)
-- **Credentials**: 
-  - User: `some_user`
-  - Password: `fill_in_something`
-  - Default DB: `postgres`
+- **Configuration**: Set via `.env` file (see [Environment Variables Configuration](#-environment-variables-configuration))
 - **Network**: `proxy` (external)
 
 #### MariaDB
 - **Purpose**: Shared MySQL-compatible database server
 - **Location**: `mariadb/`
 - **Ports**: `192.168.2.7:3306` - MariaDB (LAN only)
-- **Credentials**:
-  - Root Password: `fill_in_something`
+- **Configuration**: Set via `.env` file (see [Environment Variables Configuration](#-environment-variables-configuration))
 - **Network**: `proxy` (external)
 - **Used by**: Matomo (and other services requiring MySQL/MariaDB)
 
@@ -127,13 +124,6 @@ The complete media automation stack in `stacks/media/`:
 - **Devices**: USB device `/dev/ttyUSB0` (for Zigbee/Z-Wave)
 - **Features**: Privileged mode for full hardware access
 
-### Utilities
-
-#### Whoami
-- **Location**: `stacks/whoami/`
-- **Purpose**: Testing/debugging service
-- **Network**: `proxy` (external)
-
 ### Analytics
 
 #### Matomo
@@ -142,6 +132,33 @@ The complete media automation stack in `stacks/media/`:
 - **Port**: `8090` - Web UI
 - **Database**: Uses shared MariaDB instance
 - **Network**: `proxy` (external)
+
+#### Plausible Analytics
+- **Purpose**: Lightweight and privacy-friendly web analytics
+- **Location**: `stacks/plausible/`
+- **Database**: Uses external PostgreSQL + internal ClickHouse for events
+- **Network**: `proxy` (external)
+- **Features**: 
+  - GDPR compliant
+  - No cookies required
+  - Lightweight script (<1KB)
+
+### Utilities
+
+#### Whoami
+- **Location**: `stacks/whoami/`
+- **Purpose**: Testing/debugging service
+- **Network**: `proxy` (external)
+
+#### FileWizard
+- **Purpose**: File processing and management tool
+- **Location**: `stacks/filewizard/`
+- **Port**: `6969` - Web UI (configurable)
+- **Network**: `filewizard` (internal)
+- **Features**:
+  - Audio/video file processing
+  - Text-to-speech with Kokoro
+  - Configurable authentication
 
 ## 📦 Prerequisites
 
@@ -167,6 +184,130 @@ docker network create proxy
 ```
 
 This network allows services to communicate with Nginx Proxy Manager and other infrastructure components.
+
+## 🔐 Environment Variables Configuration
+
+All services in this homelab use environment variables for configuration, stored in `.env` files. This keeps sensitive credentials and configuration separate from the docker-compose files.
+
+### Quick Start
+
+For each service, you'll find a `.env.example` file that serves as a template:
+
+```bash
+# Example: Setting up MariaDB
+cd mariadb
+cp .env.example .env
+nano .env  # Edit with your actual passwords and configuration
+```
+
+### Security Best Practices
+
+1. **Never commit `.env` files to git** - they contain sensitive credentials
+2. **Use strong, unique passwords** for each service
+3. **The `.gitignore` is configured to exclude `.env` files** while keeping `.env.example` files
+4. **Generate secure passwords** using:
+   ```bash
+   # Generate a random password
+   openssl rand -base64 32
+   
+   # For Plausible SECRET_KEY_BASE
+   openssl rand -base64 48
+   ```
+
+### Service-Specific Configuration
+
+#### Core Infrastructure
+
+**MariaDB** (`mariadb/.env`):
+- `MYSQL_ROOT_PASSWORD` - Root password for database
+- `LAN_IP` - Your server's LAN IP address
+
+**PostgreSQL** (`postgres/.env`):
+- `POSTGRES_USER` - Database username
+- `POSTGRES_PASSWORD` - Database password
+- `POSTGRES_DB` - Default database name
+- `LAN_IP` - Your server's LAN IP address
+
+**Nginx Proxy Manager** (`npm/.env`):
+- `LAN_IP` - Your server's LAN IP address (for admin interface binding)
+
+**Portainer** (`portainer/.env`):
+- `LAN_IP` - Your server's LAN IP address
+
+**WUD** (`wud/.env`):
+- `WUD_LOG_LEVEL` - Logging level (info, debug, warn, error)
+- `WUD_WATCHER_LOCAL_CRON` - Update check schedule
+- `WUD_WATCHER_LOCAL_WATCHBYDEFAULT` - Auto-watch containers
+- `LAN_IP` - Your server's LAN IP address
+
+#### Application Stacks
+
+**Media Stack** (`stacks/media/.env`):
+- `PUID` / `PGID` - User and group IDs (run `id` command to find yours)
+- `UMASK` - File permission mask
+- `TZ` - Timezone (e.g., `Europe/Amsterdam`)
+- Port configurations for each service
+
+**Matomo** (`stacks/matomo/.env`):
+- `MATOMO_DATABASE_*` - Database connection settings
+- `MATOMO_PORT` - Web interface port
+
+**Plausible** (`stacks/plausible/.env`):
+- `BASE_URL` - Your Plausible instance URL
+- `SECRET_KEY_BASE` - Secret key (generate with `openssl rand -base64 48`)
+- `DATABASE_URL` - PostgreSQL connection string
+- Various optional email, OAuth, and geolocation settings
+
+**FileWizard** (`stacks/filewizard/.env`):
+- `LOCAL_ONLY` - Authentication mode
+- `SECRET_KEY` - Secret for auth (if enabled)
+- `PUID` / `PGID` - User and group IDs
+- `TZ` - Timezone
+- `FILEWIZARD_PORT` - Web interface port
+
+**Home Assistant** (`stacks/homeassistant/.env`):
+- `DISABLE_JEMALLOC` - Memory allocator setting
+
+### Environment Variable Workflow
+
+1. **Initial Setup**:
+   ```bash
+   # Copy all .env.example files to .env
+   find . -name ".env.example" -exec sh -c 'cp "$1" "${1%.example}"' _ {} \;
+   ```
+
+2. **Edit Configuration**:
+   ```bash
+   # Find all .env files that need editing
+   find . -name ".env" -type f
+   
+   # Edit each one with your values
+   nano mariadb/.env
+   nano postgres/.env
+   # ... etc
+   ```
+
+3. **Validate Configuration**:
+   ```bash
+   # Check that all required variables are set
+   cd <service-directory>
+   docker compose config
+   ```
+
+4. **Start Services**:
+   ```bash
+   cd <service-directory>
+   docker compose up -d
+   ```
+
+### Common Configuration Values
+
+Most services share these common values:
+
+- **LAN_IP**: `192.168.2.7` (update to your server's actual IP)
+- **Timezone**: `Europe/Amsterdam` (update to your timezone)
+- **PUID/PGID**: `1000` (find yours with `id` command)
+- **UMASK**: `002` (standard for media files)
 
 ## 🌐 Network Architecture
 
@@ -234,12 +375,34 @@ This network allows services to communicate with Nginx Proxy Manager and other i
    docker network create proxy
    ```
 
-3. **Review and update configuration**:
-   - Update LAN IP addresses in compose files if your server IP is not `192.168.2.7`
+3. **Configure environment variables**:
+   
+   Each service requires a `.env` file for configuration. Start by copying the example files:
+   
+   ```bash
+   # Copy all .env.example files to .env
+   find . -name ".env.example" -exec sh -c 'cp "$1" "${1%.example}"' _ {} \;
+   ```
+   
+   Then edit each `.env` file with your actual values:
+   
+   ```bash
+   # Essential services to configure first
+   nano mariadb/.env          # Set MYSQL_ROOT_PASSWORD and LAN_IP
+   nano postgres/.env         # Set POSTGRES_PASSWORD and LAN_IP
+   nano npm/.env              # Set LAN_IP
+   nano portainer/.env        # Set LAN_IP
+   nano stacks/media/.env     # Set timezone, PUID, PGID, ports
+   ```
+   
+   See the [Environment Variables Configuration](#-environment-variables-configuration) section for detailed information.
+
+4. **Review and update configuration**:
+   - Update LAN IP addresses in `.env` files if your server IP is not `192.168.2.7`
    - Check timezone settings (currently set to `Europe/Amsterdam`)
    - Verify paths and permissions
 
-4. **Create required directories** (for media stack):
+5. **Create required directories** (for media stack):
    ```bash
    # These should already exist based on your structure
    mkdir -p stacks/media/{downloads,media/movies,media/tv}
@@ -354,7 +517,7 @@ CREATE DATABASE IF NOT EXISTS matomo;
 CREATE USER IF NOT EXISTS 'matomo'@'%' IDENTIFIED BY 'matomo_secure_password';
 GRANT ALL PRIVILEGES ON matomo.* TO 'matomo'@'%';
 FLUSH PRIVILEGES;"
-# Enter the root password when prompted: fill_in_something
+# Enter the root password when prompted (from mariadb/.env MYSQL_ROOT_PASSWORD)
 ```
 
 **Adding new services to MariaDB:**

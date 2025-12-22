@@ -1,1 +1,7 @@
 **/config/
+
+# Ignore all .env files (contains sensitive credentials)
+**/.env
+
+# But include .env.example files (template files)
+!**/.env.example

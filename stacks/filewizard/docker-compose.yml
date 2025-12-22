@@ -2,19 +2,19 @@ services:
   filewizard:
     image: loredcast/filewizard:latest
     container_name: filewizard
-    restart: always
+    restart: no
     environment:
-      - LOCAL_ONLY=True # set False when using auth/OAuth
-      - SECRET_KEY=     # set when enabling auth
-      - UPLOADS_DIR=/app/uploads
-      - PROCESSED_DIR=/app/processed
-      - OMP_NUM_THREADS=4
-      - DOWNLOAD_KOKORO_ON_STARTUP=true
-      - PUID=1000
-      - PGID=1000
-      - TZ=Europe/Amsterdam
+      - LOCAL_ONLY=${LOCAL_ONLY}
+      - SECRET_KEY=${SECRET_KEY}
+      - UPLOADS_DIR=${UPLOADS_DIR}
+      - PROCESSED_DIR=${PROCESSED_DIR}
+      - OMP_NUM_THREADS=${OMP_NUM_THREADS}
+      - DOWNLOAD_KOKORO_ON_STARTUP=${DOWNLOAD_KOKORO_ON_STARTUP}
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
     ports:
-      - "6969:8000"
+      - "${FILEWIZARD_PORT}:8000"
     volumes:
       - ./config:/app/config
       - ./uploads:/app/uploads

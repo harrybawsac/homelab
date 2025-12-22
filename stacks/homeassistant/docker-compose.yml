@@ -12,4 +12,4 @@ services:
     devices:
       - /dev/ttyUSB0:/dev/ttyUSB0
     environment:
-      DISABLE_JEMALLOC: true
+      DISABLE_JEMALLOC: ${DISABLE_JEMALLOC}

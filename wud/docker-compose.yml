@@ -4,14 +4,14 @@ services:
     container_name: wud
     restart: always
     environment:
-      - WUD_LOG_LEVEL=info
-      - WUD_WATCHER_LOCAL_CRON=0 0 * * *
-      - WUD_WATCHER_LOCAL_WATCHBYDEFAULT=true
+      - WUD_LOG_LEVEL=${WUD_LOG_LEVEL}
+      - WUD_WATCHER_LOCAL_CRON=${WUD_WATCHER_LOCAL_CRON}
+      - WUD_WATCHER_LOCAL_WATCHBYDEFAULT=${WUD_WATCHER_LOCAL_WATCHBYDEFAULT}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./data:/store
     ports:
-      - "192.168.2.7:3069:3000"
+      - "${LAN_IP}:3069:3000"
     networks:
       - proxy
 
