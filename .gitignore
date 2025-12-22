@@ -6,6 +6,7 @@
 # Nginx Proxy Manager letsencrypt data
 npm/letsencrypt/
 npm/letsencrypt/*
+npm/data/
 
 # Portainer runtime data
 portainer/data/
