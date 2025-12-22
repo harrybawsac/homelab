@@ -1,7 +1,27 @@
+# Keep config templates, ignore runtime data and secrets
 **/config/
-
-# Ignore all .env files (contains sensitive credentials)
 **/.env
-
-# But include .env.example files (template files)
 !**/.env.example
+
+# Nginx Proxy Manager letsencrypt data
+npm/letsencrypt/
+npm/letsencrypt/*
+
+# Portainer runtime data
+portainer/data/
+
+# Databases and persistent data
+mariadb/data/
+postgres/postgres-data/
+stacks/*/data/
+stacks/*/uploads/
+stacks/*/downloads/
+stacks/*/processed/
+
+# Matomo runtime tmp/logs etc
+stacks/matomo/data/tmp/
+
+# Generic ignores
+*.log
+*.sqlite
+tmp/
