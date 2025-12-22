@@ -5,7 +5,6 @@
 
 # Nginx Proxy Manager letsencrypt data
 npm/letsencrypt/
-npm/letsencrypt/*
 npm/data/
 
 # Portainer runtime data
@@ -17,13 +16,13 @@ wud/data/
 # Databases and persistent data
 mariadb/data/
 postgres/postgres-data/
-stacks/*/data/
-stacks/*/uploads/
-stacks/*/downloads/
-stacks/*/processed/
-
-# Matomo runtime tmp/logs etc
-stacks/matomo/data/tmp/
+stacks/**/config/
+stacks/**/data/
+stacks/**/uploads/
+stacks/**/downloads/
+stacks/**/processed/
+stacks/**/movies/
+stacks/**/tv/
 
 # Generic ignores
 *.log
