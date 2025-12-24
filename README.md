@@ -22,7 +22,7 @@ This homelab setup uses Docker Compose to manage multiple containerized services
 - **Core Infrastructure**: Nginx Proxy Manager, Portainer, PostgreSQL, MariaDB
 - **Monitoring**: WUD (What's Up Docker) for container update tracking
 - **Media Stack**: Complete *arr suite for media automation
-- **Analytics**: Matomo and Plausible for web analytics
+- **Analytics**: Plausible for web analytics
 - **Home Automation**: Home Assistant
 - **Utilities**: FileWizard, Whoami, and other helper services
 
@@ -58,7 +58,7 @@ This homelab setup uses Docker Compose to manage multiple containerized services
 - **Ports**: `192.168.2.7:3306` - MariaDB (LAN only)
 - **Configuration**: Set via `.env` file (see [Environment Variables Configuration](#-environment-variables-configuration))
 - **Network**: `proxy` (external)
-- **Used by**: Matomo (and other services requiring MySQL/MariaDB)
+- **Used by**: Services requiring MySQL/MariaDB
 
 ### Monitoring
 
@@ -125,13 +125,6 @@ The complete media automation stack in `stacks/media/`:
 - **Features**: Privileged mode for full hardware access
 
 ### Analytics
-
-#### Matomo
-- **Purpose**: Self-hosted web analytics (Google Analytics alternative)
-- **Location**: `stacks/matomo/`
-- **Port**: `8090` - Web UI
-- **Database**: Uses shared MariaDB instance
-- **Network**: `proxy` (external)
 
 #### Plausible Analytics
 - **Purpose**: Lightweight and privacy-friendly web analytics
@@ -248,10 +241,6 @@ nano .env  # Edit with your actual passwords and configuration
 - `TZ` - Timezone (e.g., `Europe/Amsterdam`)
 - Port configurations for each service
 
-**Matomo** (`stacks/matomo/.env`):
-- `MATOMO_DATABASE_*` - Database connection settings
-- `MATOMO_PORT` - Web interface port
-
 **Plausible** (`stacks/plausible/.env`):
 - `BASE_URL` - Your Plausible instance URL
 - `SECRET_KEY_BASE` - Secret key (generate with `openssl rand -base64 48`)
@@ -329,9 +318,9 @@ Most services share these common values:
                       │
     ┌─────────────────┼─────────────────┐
     │                 │                 │
-┌───▼─────┐  ┌──────▼──────┐  ┌───▼────┐  ┌────▼────┐  ┌──▼──┐  ┌───▼───┐
-│Portainer│  │ PostgreSQL  │  │MariaDB │  │ Matomo  │  │ WUD │  │Whoami │
-└─────────┘  └─────────────┘  └────────┘  └─────────┘  └─────┘  └───────┘
+┌───▼─────┐  ┌──────▼──────┐  ┌───▼────┐  ┌──▼──┐  ┌───▼───┐
+│Portainer│  │ PostgreSQL  │  │MariaDB │  │ WUD │  │Whoami │
+└─────────┘  └─────────────┘  └────────┘  └─────┘  └───────┘
 
 ┌──────────────────────────────────────────────────────────────┐
 │              Media Stack ('media' network)                   │
@@ -423,7 +412,6 @@ docker compose -f wud/docker-compose.yml up -d
 # Start application stacks
 docker compose -f stacks/media/docker-compose.yml up -d
 docker compose -f stacks/homeassistant/docker-compose.yml up -d
-docker compose -f stacks/matomo/docker-compose.yml up -d
 docker compose -f stacks/whoami/docker-compose.yml up -d
 ```
 
@@ -499,7 +487,7 @@ The media stack services need to be configured in this order:
 # Follow the onboarding wizard on first access
 ```
 
-#### 5. MariaDB Setup (for Matomo and other services)
+#### 5. MariaDB Setup
 
 The shared MariaDB instance requires creating databases/users for each service:
 
@@ -511,11 +499,11 @@ docker compose up -d
 # Wait for it to be healthy
 docker compose ps
 
-# Create Matomo database and user
+# Example: Create a database and user for a service
 docker exec -it mariadb mariadb -u root -p -e "
-CREATE DATABASE IF NOT EXISTS matomo;
-CREATE USER IF NOT EXISTS 'matomo'@'%' IDENTIFIED BY 'matomo_secure_password';
-GRANT ALL PRIVILEGES ON matomo.* TO 'matomo'@'%';
+CREATE DATABASE IF NOT EXISTS your_database;
+CREATE USER IF NOT EXISTS 'your_user'@'%' IDENTIFIED BY 'secure_password';
+GRANT ALL PRIVILEGES ON your_database.* TO 'your_user'@'%';
 FLUSH PRIVILEGES;"
 # Enter the root password when prompted (from mariadb/.env MYSQL_ROOT_PASSWORD)
 ```
@@ -530,18 +518,7 @@ GRANT ALL PRIVILEGES ON <service_name>.* TO '<service_user>'@'%';
 FLUSH PRIVILEGES;"
 ```
 
-#### 6. Matomo Setup
-```bash
-# Start Matomo (after MariaDB is running and database is created)
-cd /home/projects/homelab/stacks/matomo
-docker compose up -d
-
-# Access at http://your-server:8090
-# The database connection is pre-configured via environment variables
-# Follow the web-based setup wizard
-```
-
-#### 7. WUD (What's Up Docker) Setup
+#### 6. WUD (What's Up Docker) Setup
 ```bash
 # Start WUD
 cd /home/projects/homelab/wud
@@ -757,10 +734,7 @@ cd "$HOMELAB_DIR/stacks/homeassistant"
 docker compose pull && docker compose up -d --force-recreate
 
 echo ""
-echo "[8/8] Updating Application Stacks..."
-cd "$HOMELAB_DIR/stacks/matomo"
-docker compose pull && docker compose up -d --force-recreate
-
+echo "[8/8] Updating Whoami..."
 cd "$HOMELAB_DIR/stacks/whoami"
 docker compose pull && docker compose up -d --force-recreate
 
@@ -956,7 +930,6 @@ cp -r "$HOMELAB_DIR/stacks/media/prowlarr/config" "$BACKUP_DIR/prowlarr-config"
 cp -r "$HOMELAB_DIR/stacks/media/bazarr/config" "$BACKUP_DIR/bazarr-config"
 cp -r "$HOMELAB_DIR/stacks/media/qbittorrent/config" "$BACKUP_DIR/qbittorrent-config"
 cp -r "$HOMELAB_DIR/stacks/homeassistant/config" "$BACKUP_DIR/homeassistant-config"
-cp -r "$HOMELAB_DIR/stacks/matomo/data" "$BACKUP_DIR/matomo-data"
 
 # Backup compose files
 cp -r "$HOMELAB_DIR"/*.yml "$BACKUP_DIR/" 2>/dev/null || true
@@ -1052,7 +1025,6 @@ sudo systemctl restart docker
 1. **Change default passwords**:
    - PostgreSQL password in `postgres/docker-compose.yml`
    - MariaDB root password in `mariadb/docker-compose.yml`
-   - Matomo database password in `stacks/matomo/docker-compose.yml`
    - Nginx Proxy Manager admin credentials
    - qBittorrent web UI password
 
