@@ -2,6 +2,7 @@
 **/config/
 **/.env
 !**/.env.example
+**/docker.env
 
 # Nginx Proxy Manager letsencrypt data
 npm/letsencrypt/

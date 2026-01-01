@@ -14,7 +14,7 @@ services:
     # No ports exposed - NPM will proxy to this container via the 'proxy' network
 
   redis:
-    image: redis:7-alpine
+    image: redis
     container_name: outline-redis
     restart: always
     volumes:
