@@ -50,7 +50,7 @@ services:
       # registration: https://github.com/plausible/community-edition/wiki/configuration#registration
       - TOTP_VAULT_KEY
       - DISABLE_REGISTRATION
-      - ENABLE_EMAIL_VERIFICATION
+      - ENABLE_EMAIL_VERIFICATION=${ENABLE_EMAIL_VERIFICATION}
       # web: https://github.com/plausible/community-edition/wiki/configuration#web
       - HTTP_PORT=${HTTP_PORT}
       - HTTPS_PORT
@@ -68,13 +68,13 @@ services:
       - MAXMIND_EDITION
       # email: https://github.com/plausible/community-edition/wiki/configuration#email
       - MAILER_ADAPTER
-      - MAILER_EMAIL
-      - MAILER_NAME
-      - SMTP_HOST_ADDR
-      - SMTP_HOST_PORT
-      - SMTP_USER_NAME
-      - SMTP_USER_PWD
-      - SMTP_HOST_SSL_ENABLED
+      - MAILER_EMAIL=${MAILER_EMAIL}
+      - MAILER_NAME=${MAILER_NAME}
+      - SMTP_HOST_ADDR=${SMTP_HOST_ADDR}
+      - SMTP_HOST_PORT=${SMTP_HOST_PORT}
+      - SMTP_USER_NAME=${SMTP_USER_NAME}
+      - SMTP_USER_PWD=${SMTP_USER_PWD}
+      - SMTP_HOST_SSL_ENABLED=${SMTP_HOST_SSL_ENABLED}
       - POSTMARK_API_KEY
       - MAILGUN_API_KEY
       - MAILGUN_DOMAIN
