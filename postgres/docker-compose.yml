@@ -8,9 +8,9 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
-      - postgres-data:/var/lib/postgresql/data
-    networks:
-      - proxy
+      - postgres-data:/var/lib/postgresql
+    # networks:
+    #   - proxy
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 30s
@@ -23,6 +23,6 @@ services:
 volumes:
   postgres-data:
 
-networks:
-  proxy:
-    external: true
+# networks:
+#   proxy:
+#     external: true
