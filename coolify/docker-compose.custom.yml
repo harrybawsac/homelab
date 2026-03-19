@@ -1,0 +1,30 @@
+# docker-compose.custom.yml
+#
+# Coolify custom override — survives upgrades.
+# Installed to /data/coolify/source/ by install.sh.
+#
+# Purpose:
+#   1. Attach the Coolify app container to the homelab 'proxy' network so
+#      Nginx Proxy Manager can reach it at coolify:8000.
+#   2. Remap coolify-proxy (Caddy) away from host ports 80/443 to avoid
+#      conflicting with NPM, while keeping Coolify's proxy functional.
+
+services:
+  # The main Coolify app — add it to the external proxy network
+  # so NPM can forward coolify.yourdomain.com → coolify:8000
+  coolify:
+    networks:
+      - proxy
+
+  # Coolify's built-in Caddy proxy — remap to LAN-only alternative ports
+  # so it doesn't clash with NPM which owns 80 and 443 on this host.
+  # Apps managed by Coolify will be reachable via :8080 / :8081.
+  coolify-proxy:
+    ports:
+      - "${LAN_IP:-0.0.0.0}:8080:80"
+      - "${LAN_IP:-0.0.0.0}:8081:443"
+      - "8443:443/udp"
+
+networks:
+  proxy:
+    external: true
