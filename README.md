@@ -24,7 +24,6 @@ This homelab setup uses Docker Compose to manage multiple containerized services
 - **Media Stack**: Complete *arr suite for media automation
 - **Analytics**: Plausible for web analytics
 - **Home Automation**: Home Assistant
-- **Invoicing**: Invoice Ninja for self-hosted invoicing and client management
 - **Utilities**: FileWizard, Whoami, and other helper services
 
 ## 🚀 Services
@@ -154,28 +153,6 @@ The complete media automation stack in `stacks/media/`:
   - Full-text search
   - API access
 
-### Invoicing
-
-#### Invoice Ninja
-- **Purpose**: Self-hosted invoicing, quoting, and client management
-- **Location**: `stacks/invoiceninja/`
-- **Database**: Uses shared MariaDB (dedicated `invoiceninja` database)
-- **Cache/Queue/Session**: Internal Redis container
-- **Network**: `proxy` (external) + `invoiceninja` (internal)
-- **Features**:
-  - Invoices, quotes, recurring billing, and payments
-  - Time tracking and project management
-  - Client portal
-  - PDF generation via built-in Chrome (Snappdf)
-  - Email delivery support
-- **Initial setup**:
-  1. Create the MariaDB database and user (see [MariaDB Setup](#5-mariadb-setup))
-  2. Generate `APP_KEY`: `docker run --rm -it invoiceninja/invoiceninja-debian php artisan key:generate --show`
-  3. Copy `.env.example` → `.env`, set `APP_URL`, `APP_KEY`, `DB_PASSWORD`, and admin credentials
-  4. Start with `docker compose up -d`
-  5. Add a proxy host in NPM pointing to `invoiceninja-nginx:80`
-  6. After first login, remove `IN_USER_EMAIL` and `IN_PASSWORD` from `.env` and restart the `app` container
-
 ### Utilities
 
 #### Whoami
@@ -296,15 +273,6 @@ nano .env  # Edit with your actual passwords and configuration
 
 **Home Assistant** (`stacks/homeassistant/.env`):
 - `DISABLE_JEMALLOC` - Memory allocator setting
-
-**Invoice Ninja** (`stacks/invoiceninja/.env`):
-- `APP_URL` - Full public URL of your instance (e.g. `https://invoices.yourdomain.com`)
-- `APP_KEY` - Laravel encryption key (generate with `php artisan key:generate --show`)
-- `APP_DEBUG` - Set to `false` in production
-- `TRUSTED_PROXIES` - Set to `'*'` when behind NPM
-- `DB_PASSWORD` - Password for the `invoiceninja` MariaDB user
-- `IN_USER_EMAIL` / `IN_PASSWORD` - Initial admin credentials (remove after first login)
-- `MAIL_*` - SMTP settings for sending invoices and notifications
 
 ### Environment Variable Workflow
 
