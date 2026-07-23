@@ -1,26 +1,19 @@
 # Keep config templates, ignore runtime data and secrets
 **/config/
+**/data/
 **/.env
 !**/.env.example
 **/docker.env
 
-# Nginx Proxy Manager letsencrypt data
+# Nginx Proxy Manager
 npm/letsencrypt/
-npm/data/
 
-# Portainer runtime data
-portainer/data/
-
-# WUD runtime data
-wud/data/
-
-# Databases and persistent data
-mariadb/data/
+# Databases
 postgres/postgres-data/
-stacks/**/config/
-stacks/**/data/
-stacks/**/uploads/
+
+# stacks runtime directories (non-config, non-data)
 stacks/**/downloads/
+stacks/**/uploads/
 stacks/**/processed/
 stacks/**/movies/
 stacks/**/tv/

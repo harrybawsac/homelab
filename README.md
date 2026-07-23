@@ -11,6 +11,7 @@ This repository contains Docker Compose configurations for a complete homelab se
 - [Network Architecture](#network-architecture)
 - [Getting Started](#getting-started)
 - [Managing Services](#managing-services)
+- [AI Services](#ai-services)
 - [Updating Services](#updating-services)
 - [Troubleshooting](#troubleshooting)
 - [Backup and Restore](#backup-and-restore)
@@ -25,6 +26,7 @@ This homelab setup uses Docker Compose to manage multiple containerized services
 - **Analytics**: Plausible for web analytics
 - **Home Automation**: Home Assistant
 - **Utilities**: FileWizard, Whoami, and other helper services
+- **AI Services**: Agent Gateway and Hermes Agent for AI-powered automation
 
 ## 🚀 Services
 
@@ -170,6 +172,45 @@ The complete media automation stack in `stacks/media/`:
   - Text-to-speech with Kokoro
   - Configurable authentication
 
+### AI Services
+
+#### Agent Gateway
+- **Purpose**: AI agent gateway with OpenAI-compatible API, providing proxy and routing for LLM requests
+- **Location**: `stacks/agentgateway/`
+- **Image**: `cr.agentgateway.dev/agentgateway:v1.3.1`
+- **Ports**:
+  - `3000` - Service endpoint
+  - `4000` - Service endpoint
+  - `127.0.0.1:15000` - Admin UI (local only)
+- **Network**: `proxy` (external)
+- **Features**:
+  - OpenAI-compatible API
+  - Admin dashboard at `/ui`
+  - Configurable via UI or config file
+  - Automatic config file creation on first start
+
+#### Hermes Agent
+- **Purpose**: Autonomous AI agent with CLI, TUI, chat platforms, and web dashboard
+- **Location**: `stacks/hermes/`
+- **Image**: `nousresearch/hermes-agent:latest`
+- **Command**: `gateway run` (auto-supervised by s6-overlay)
+- **Ports**:
+  - `8642` - OpenAI-compatible API server
+  - `9119` - Web dashboard (when `HERMES_DASHBOARD=1`)
+- **Network**: `proxy` (external)
+- **Features**:
+  - Multi-profile support (run independent agents from one container)
+  - s6-supervised gateway with auto-restart on crash
+  - Built-in web dashboard with auth (basic auth or OIDC)
+  - Supports Telegram, Discord, Slack, WhatsApp bridges
+  - Playwright/Chromium for browser automation
+  - Skills, memories, sessions, and cron jobs
+  - OpenAI-compatible API for external tools
+- **Connects to**:
+  - Agent Gateway (reachable as `agentgateway:3000`)
+  - Outline Wiki (reachable as `outline:3000`)
+  - Other services on the `proxy` network
+
 ## 📦 Prerequisites
 
 ### System Requirements
@@ -264,6 +305,19 @@ nano .env  # Edit with your actual passwords and configuration
 - `DATABASE_URL` - PostgreSQL connection string
 - Various optional email, OAuth, and geolocation settings
 
+**Agent Gateway** (`stacks/agentgateway/.env`):
+- `PUID` / `PGID` - User and group IDs
+
+**Hermes Agent** (`stacks/hermes/.env`):
+- `PUID` / `PGID` - User and group IDs
+- `API_SERVER_KEY` - Secret key for the OpenAI-compatible API (generate with `openssl rand -hex 32`)
+- `API_SERVER_CORS_ORIGINS` - CORS origins for the API server (default: `*`)
+- `HERMES_DASHBOARD` - Set to `1` to enable the web dashboard
+- `HERMES_DASHBOARD_BASIC_AUTH_USERNAME` / `_PASSWORD` - Dashboard login credentials (required for non-loopback bind)
+- `HERMES_DASHBOARD_BASIC_AUTH_SECRET` - Session secret for restart-stable login sessions (generate with `openssl rand -hex 32`)
+- `HERMES_MEMORY_LIMIT` - Container memory limit (default: `4G`)
+- `HERMES_CPU_LIMIT` - Container CPU limit (default: `2.0`)
+
 **FileWizard** (`stacks/filewizard/.env`):
 - `LOCAL_ONLY` - Authentication mode
 - `SECRET_KEY` - Secret for auth (if enabled)
@@ -333,11 +387,11 @@ Most services share these common values:
           │   (external/shared)   │
           └───────────┬───────────┘
                       │
-    ┌─────────────────┼─────────────────┐
-    │                 │                 │
-┌───▼─────┐  ┌──────▼──────┐  ┌───▼────┐  ┌──▼──┐  ┌───▼───┐
-│Portainer│  │ PostgreSQL  │  │MariaDB │  │ WUD │  │Whoami │
-└─────────┘  └─────────────┘  └────────┘  └─────┘  └───────┘
+    ┌─────────────────┼──────────────────┐
+    │                 │                  │
+┌───▼─────┐  ┌──────▼──────┐  ┌───▼────┐  ┌──▼──┐  ┌───▼───┐   ┌─────────────┐   ┌──────────┐
+│Portainer│  │ PostgreSQL  │  │MariaDB │  │ WUD │  │Whoami  │   │Agent Gateway│   │  Hermes  │
+└─────────┘  └─────────────┘  └────────┘  └─────┘  └───────┘   └─────────────┘   └──────────┘
 
 ┌──────────────────────────────────────────────────────────────┐
 │              Media Stack ('media' network)                   │
@@ -430,6 +484,10 @@ docker compose -f wud/docker-compose.yml up -d
 docker compose -f stacks/media/docker-compose.yml up -d
 docker compose -f stacks/homeassistant/docker-compose.yml up -d
 docker compose -f stacks/whoami/docker-compose.yml up -d
+docker compose -f stacks/plausible/docker-compose.yml up -d
+docker compose -f stacks/outline/docker-compose.yml up -d
+docker compose -f stacks/agentgateway/docker-compose.yml up -d
+docker compose -f stacks/hermes/docker-compose.yml up -d
 ```
 
 #### Start Individual Stacks
@@ -876,6 +934,8 @@ cp -r "$HOMELAB_DIR/stacks/media/prowlarr/config" "$BACKUP_DIR/prowlarr-config"
 cp -r "$HOMELAB_DIR/stacks/media/bazarr/config" "$BACKUP_DIR/bazarr-config"
 cp -r "$HOMELAB_DIR/stacks/media/qbittorrent/config" "$BACKUP_DIR/qbittorrent-config"
 cp -r "$HOMELAB_DIR/stacks/homeassistant/config" "$BACKUP_DIR/homeassistant-config"
+cp -r "$HOMELAB_DIR/stacks/agentgateway/config" "$BACKUP_DIR/agentgateway-config"
+cp -r "$HOMELAB_DIR/stacks/hermes/data" "$BACKUP_DIR/hermes-data"
 
 # Backup compose files
 cp -r "$HOMELAB_DIR"/*.yml "$BACKUP_DIR/" 2>/dev/null || true
@@ -1006,4 +1066,4 @@ This configuration is provided as-is for personal use.
 
 ---
 
-**Last Updated**: December 2, 2025
+**Last Updated**: July 23, 2026

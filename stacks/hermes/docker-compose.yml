@@ -1,0 +1,34 @@
+services:
+  hermes:
+    image: nousresearch/hermes-agent:latest
+    container_name: hermes
+    restart: unless-stopped
+    command: gateway run
+    shm_size: 1g
+    ports:
+      - "${LAN_IP:-0.0.0.0}:8642:8642"
+      - "${LAN_IP:-0.0.0.0}:9119:9119"
+    volumes:
+      - ./data:/opt/data
+    environment:
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+      - HERMES_DASHBOARD=${HERMES_DASHBOARD:-1}
+      - API_SERVER_ENABLED=${API_SERVER_ENABLED:-true}
+      - API_SERVER_HOST=${API_SERVER_HOST:-0.0.0.0}
+      - API_SERVER_KEY=${API_SERVER_KEY}
+      - API_SERVER_CORS_ORIGINS=${API_SERVER_CORS_ORIGINS}
+      - HERMES_DASHBOARD_BASIC_AUTH_USERNAME=${HERMES_DASHBOARD_BASIC_AUTH_USERNAME}
+      - HERMES_DASHBOARD_BASIC_AUTH_PASSWORD=${HERMES_DASHBOARD_BASIC_AUTH_PASSWORD}
+      - HERMES_DASHBOARD_BASIC_AUTH_SECRET=${HERMES_DASHBOARD_BASIC_AUTH_SECRET}
+    networks:
+      - proxy
+    deploy:
+      resources:
+        limits:
+          memory: ${HERMES_MEMORY_LIMIT:-4G}
+          cpus: ${HERMES_CPU_LIMIT:-2.0}
+
+networks:
+  proxy:
+    external: true
