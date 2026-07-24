@@ -2,7 +2,7 @@
 
 This repository contains Docker Compose configurations for a complete homelab setup including media automation, home automation, reverse proxy, and database services.
 
-## 📋 Table of Contents
+## Table of Contents
 
 - [Overview](#overview)
 - [Services](#services)
@@ -16,7 +16,7 @@ This repository contains Docker Compose configurations for a complete homelab se
 - [Troubleshooting](#troubleshooting)
 - [Backup and Restore](#backup-and-restore)
 
-## 🏗️ Overview
+## Overview
 
 This homelab setup uses Docker Compose to manage multiple containerized services. The infrastructure is organized into logical stacks:
 
@@ -28,7 +28,7 @@ This homelab setup uses Docker Compose to manage multiple containerized services
 - **Utilities**: FileWizard, Whoami, and other helper services
 - **AI Services**: Agent Gateway and Hermes Agent for AI-powered automation
 
-## 🚀 Services
+## Services
 
 ### Core Infrastructure
 
@@ -211,7 +211,7 @@ The complete media automation stack in `stacks/media/`:
   - Outline Wiki (reachable as `outline:3000`)
   - Other services on the `proxy` network
 
-## 📦 Prerequisites
+## Prerequisites
 
 ### System Requirements
 
@@ -236,7 +236,7 @@ docker network create proxy
 
 This network allows services to communicate with Nginx Proxy Manager and other infrastructure components.
 
-## 🔐 Environment Variables Configuration
+## Environment Variables Configuration
 
 All services in this homelab use environment variables for configuration, stored in `.env` files. This keeps sensitive credentials and configuration separate from the docker-compose files.
 
@@ -369,7 +369,7 @@ Most services share these common values:
 - **PUID/PGID**: `1000` (find yours with `id` command)
 - **UMASK**: `002` (standard for media files)
 
-## 🌐 Network Architecture
+## Network Architecture
 
 ```
 ┌─────────────────────────────────────────────┐
@@ -421,7 +421,7 @@ Most services share these common values:
 - Admin interfaces (81, 9443, 5432) are bound to LAN IP `192.168.2.7`
 - Media services use internal networking, expose ports for LAN access only
 
-## 🎯 Getting Started
+## Getting Started
 
 ### Initial Setup
 
@@ -629,7 +629,7 @@ WUD_TRIGGER_DISCORD_MYNOTIFIER_THRESHOLD=all
 3. Containers with available updates will be highlighted
 4. Use the information to decide when to run `update-homelab.sh`
 
-## 🔧 Managing Services
+## Managing Services
 
 ### View Running Containers
 
@@ -708,7 +708,7 @@ docker compose down -v
 docker compose down --rmi all
 ```
 
-## 🔄 Updating Services
+## Updating Services
 
 ### Method 1: Update All Services in a Stack
 
@@ -841,7 +841,7 @@ docker run --rm -v sonarr_config:/data -v $(pwd):/backup \
 docker compose up -d sonarr
 ```
 
-## 🔍 Troubleshooting
+## Troubleshooting
 
 ### Check Service Health
 
@@ -910,7 +910,7 @@ rm -rf ./sonarr/config/*
 docker compose up -d sonarr
 ```
 
-## 💾 Backup and Restore
+## Backup and Restore
 
 ### Backup Configuration
 
@@ -991,7 +991,7 @@ docker exec -i postgres psql -U username < postgres-backup-20250115.sql
 docker exec -i postgres psql -U username postgres < postgres-db-backup-20250115.sql
 ```
 
-## 📊 Monitoring
+## Monitoring
 
 ### Resource Usage
 
@@ -1010,8 +1010,8 @@ docker system df -v
 
 Configure log rotation to prevent disk space issues:
 
-```bash
-# /etc/docker/daemon.json
+```json
+// /etc/docker/daemon.json
 {
   "log-driver": "json-file",
   "log-opts": {
@@ -1026,7 +1026,7 @@ Restart Docker daemon:
 sudo systemctl restart docker
 ```
 
-## 🔒 Security Considerations
+## Security Considerations
 
 1. **Change default passwords**:
    - PostgreSQL password in `postgres/docker-compose.yml`
@@ -1048,7 +1048,7 @@ sudo systemctl restart docker
 
 5. **Backup regularly**: Automate backups of configurations and data
 
-## 📚 Additional Resources
+## Additional Resources
 
 - [Docker Compose Documentation](https://docs.docker.com/compose/)
 - [LinuxServer.io Documentation](https://docs.linuxserver.io/)
@@ -1056,14 +1056,14 @@ sudo systemctl restart docker
 - [Nginx Proxy Manager Documentation](https://nginxproxymanager.com/guide/)
 - [TRaSH Guides](https://trash-guides.info/) - Excellent guides for *arr services
 
-## 🤝 Contributing
+## Contributing
 
 Feel free to submit issues or pull requests for improvements to this homelab setup.
 
-## 📝 License
+## License
 
 This configuration is provided as-is for personal use.
 
 ---
 
-**Last Updated**: July 23, 2026
+**Last Updated**: July 24, 2026
